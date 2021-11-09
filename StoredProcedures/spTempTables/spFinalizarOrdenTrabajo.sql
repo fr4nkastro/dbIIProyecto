@@ -18,11 +18,13 @@ AS
 
 				exec spUpdateOrdenTrabajo @idOrdenTrabajo,@estado='F', @fechaFinal=@fecha
 			
-				DECLARE @servicioID numeric, @valor float, @clienteID numeric
+				DECLARE @servicioID numeric, @valor float, @clienteID numeric, @facturaID numeric
 				WHILE exists(SELECT * FROM #tServicioOrdenTrabajo)
 					BEGIN
 						select top 1 @servicioID= servicioID, @valor=precio, @clienteID=clienteID FROM #tServicioOrdenTrabajo order by servicioID asc
 						Exec spAddFacturaServicio @servicioID,@valor,@fecha,@clienteID
+						SELECT @facturaID=MAX(id) FROM FACTURA_SERVICIO					
+						Exec spAddDetalleFactura @facturaID, @idOrdenTrabajo
 						DELETE FROM #tServicioOrdenTrabajo WHERE servicioID=@servicioID
 					END
 				END
